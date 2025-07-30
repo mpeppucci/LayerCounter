@@ -60,19 +60,6 @@ Imagine having this scenario in the layer panel:
 - **Python**: 3.9 or higher
 - **Operating System**: Windows, macOS, Linux
 
-## Plugin Structure
-
-```
-layer_counter/
-├── __init__.py              # Plugin initialization
-├── layer_counter.py         # Main plugin logic
-├── layer_counter_dialog.py  # Dialog class (if needed)
-├── metadata.txt             # Plugin metadata
-├── icon.png                 # Plugin icon
-├── README.md               # This file
-└── resources.py            # Compiled Qt resources
-```
-
 ## Development
 
 ### Main Features
@@ -92,7 +79,7 @@ The code is easily extensible to add features such as:
 
 ## Author
 
-**Eagleprojects S.p.A.**
+**GIS Team Eagleprojects S.p.A.**
 - Email: gis@eagleprojects.it
 - Date: 2025-07-30
 
@@ -111,16 +98,5 @@ the Free Software Foundation; either version 2 of the License, or
 
 For bug reports, feature requests, or technical support, contact:
 - Email: gis@eagleprojects.it
-
-## Changelog
-
-### v0.1 (2025-07-30)
-- ✨ First release
-- ✅ Total layer counting in project
-- ✅ Selected layer counting in panel
-- ✅ Toolbar and menu interface
-- ✅ Informative popup with results
-
----
 
 **Happy mapping with QGIS! 🗺️**

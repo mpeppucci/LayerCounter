@@ -5,12 +5,13 @@
 [general]
 name=Layer Counter
 qgisMinimumVersion=3.28
-description=This plugin allows to count the total layers loaded or selected in the layer panel.
+description=Counting the total layers loaded or selected in the layers panel.
 version=1.0
 author=GIS Team Eagleprojects S.p.A.
 email=gis@eagleprojects.it
 
-about=This plugin allows to count the total layers loaded or selected in the layer panel.
+about=This plugin allows to count the total layers loaded or selected (highlighted in blue) in the layers panel; 
+any groups present in the layers panel are obviously not considered in the count.
 
 tracker=https://github.com/mpeppucci/LayerCounter/issues
 repository=https://github.com/mpeppucci/LayerCounter
