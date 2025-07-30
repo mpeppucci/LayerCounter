@@ -10,8 +10,7 @@ version=1.0
 author=GIS Team Eagleprojects S.p.A.
 email=gis@eagleprojects.it
 
-about=This plugin allows to count the total number of layers loaded and the number of the selected ones (highlighted in blue) in the layers panel of QGIS; 
-any groups present in the layers panel are obviously not considered in the count.
+about=This plugin allows to count the total number of layers loaded and the number of the selected ones (highlighted in blue) in the layers panel of QGIS; any groups present in the layers panel are obviously not considered in the count.
 
 tracker=https://github.com/mpeppucci/LayerCounter/issues
 repository=https://github.com/mpeppucci/LayerCounter
