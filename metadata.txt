@@ -6,7 +6,7 @@
 name=Layer Counter
 qgisMinimumVersion=3.28
 description=Counting the total layers loaded and selected in the layers panel.
-version=1.0
+version=1.2
 author=GIS Team Eagleprojects S.p.A.
 email=gis@eagleprojects.it
 
@@ -20,7 +20,9 @@ repository=https://github.com/mpeppucci/LayerCounter
 
 hasProcessingProvider=no
 # Uncomment the following line and add your changelog:
-changelog=1.0 
+changelog=1.2
+        -Adding metadata tags and upgrade as widget embedded in the panel
+        1.0 
         - First release
 
 # Tags are comma separated with spaces allowed
