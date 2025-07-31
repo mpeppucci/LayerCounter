@@ -21,11 +21,79 @@
  ***************************************************************************/
 """
 
-from qgis.PyQt.QtCore import QCoreApplication
+from qgis.PyQt.QtCore import QCoreApplication, pyqtSignal, Qt
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QMessageBox
+from qgis.PyQt.QtWidgets import QAction, QWidget, QVBoxLayout, QLabel, QDockWidget
 from qgis.core import QgsProject
 import os.path
+
+
+class LayerCounterWidget(QWidget):
+    """Widget per il pannello del contatore layer."""
+    
+    def __init__(self, iface, parent=None):
+        super(LayerCounterWidget, self).__init__(parent)
+        self.iface = iface
+        self.setupUi()
+        self.connectSignals()
+        self.updateCounts()
+    
+    def setupUi(self):
+        """Configura l'interfaccia utente del widget."""
+        layout = QVBoxLayout()
+        
+        # Etichette per i conteggi (senza titolo)
+        self.total_label = QLabel("Total layers: 0")
+        self.selected_label = QLabel("Selected layers: 0")
+        
+        # Stile per le etichette (ingrandite)
+        label_style = "font-size: 12px; margin: 0px; padding: 1px; font-weight: bold; text-align: left;"
+        self.total_label.setStyleSheet(label_style)
+        self.selected_label.setStyleSheet(label_style)
+        
+        # Aggiungi i widget al layout (senza spazi extra)
+        layout.setContentsMargins(5, 5, 5, 5)  # Margini ridotti del layout
+        layout.setSpacing(2)  # Spazio ridotto tra gli elementi
+        layout.addWidget(self.total_label)
+        layout.addWidget(self.selected_label)
+        layout.addStretch()  # Spazio flessibile in fondo
+        
+        self.setLayout(layout)
+        self.setMinimumHeight(80)
+    
+    def connectSignals(self):
+        """Connette i segnali per l'aggiornamento automatico."""
+        # Aggiornamento quando vengono aggiunti/rimossi layer
+        QgsProject.instance().layersAdded.connect(self.updateCounts)
+        QgsProject.instance().layersRemoved.connect(self.updateCounts)
+        QgsProject.instance().cleared.connect(self.updateCounts)
+        
+        # Aggiornamento quando cambiano le selezioni
+        if hasattr(self.iface, 'layerTreeView'):
+            selection_model = self.iface.layerTreeView().selectionModel()
+            if selection_model:
+                selection_model.selectionChanged.connect(self.updateCounts)
+    
+    def updateCounts(self):
+        """Aggiorna i conteggi dei layer."""
+        try:
+            # Conta tutti i layer nel progetto
+            total_layers = len(QgsProject.instance().mapLayers())
+            
+            # Conta i layer selezionati
+            selected_layers = 0
+            if hasattr(self.iface, 'layerTreeView'):
+                selected_layers_list = self.iface.layerTreeView().selectedLayers()
+                selected_layers = len(selected_layers_list)
+            
+            # Aggiorna le etichette
+            self.total_label.setText(f"Total layers: {total_layers}")
+            self.selected_label.setText(f"Selected layers: {selected_layers}")
+            
+        except Exception as e:
+            print(f"Errore nell'aggiornamento conteggi: {e}")
+            self.total_label.setText("Total layers: Errore")
+            self.selected_label.setText("Selected layers: Errore")
 
 
 class layer_counter:
@@ -42,6 +110,8 @@ class layer_counter:
         self.actions = []
         self.menu = 'Layer Counter'
         self.first_start = None
+        self.dock_widget = None
+        self.widget = None
 
     def tr(self, message):
         """Get the translation for a string using Qt translation API."""
@@ -82,11 +152,27 @@ class layer_counter:
         
         print("DEBUG: Layer Counter plugin initGui() called")
         
+        # Crea il widget per il pannello
+        self.widget = LayerCounterWidget(self.iface)
+        
+        # Crea il dock widget
+        self.dock_widget = QDockWidget("Layer Counter", self.iface.mainWindow())
+        self.dock_widget.setWidget(self.widget)
+        self.dock_widget.setAllowedAreas(
+            Qt.LeftDockWidgetArea | 
+            Qt.RightDockWidgetArea |
+            Qt.BottomDockWidgetArea
+        )
+        
+        # Aggiungi il dock widget alla finestra principale
+        self.iface.addDockWidget(Qt.LeftDockWidgetArea, self.dock_widget)
+        
+        # Aggiungi azione per mostrare/nascondere il pannello
         icon_path = os.path.join(self.plugin_dir, 'icon.png')
         self.add_action(
             icon_path,
             text='Layer Counter',
-            callback=self.test_function,
+            callback=self.toggle_panel,
             parent=self.iface.mainWindow())
 
         self.first_start = True
@@ -95,39 +181,25 @@ class layer_counter:
         """Removes the plugin menu item and icon from QGIS GUI."""
         print("DEBUG: Layer Counter plugin unload() called")
         
+        # Rimuovi il dock widget
+        if self.dock_widget:
+            self.iface.removeDockWidget(self.dock_widget)
+            self.dock_widget = None
+            self.widget = None
+        
         # Remove actions
         for action in self.actions:
             self.iface.removePluginMenu(self.menu, action)
             self.iface.removeToolBarIcon(action)
 
-    def test_function(self):
-        """Main function that counts layers in the project."""
-        from qgis.core import QgsProject
-        
-        # Count all layers in the project
-        total_layers = len(QgsProject.instance().mapLayers())
-        
-        # Count SELECTED layers (highlighted in blue in the layer panel)
-        selected_layers_list = self.iface.layerTreeView().selectedLayers()
-        selected_layers = len(selected_layers_list)
-        
-        # Debug: show which layers are selected
-        print("Selected layers:")
-        for layer in selected_layers_list:
-            print(f"  - {layer.name()}")
-        
-        # Message with both counts
-        message = "Layers in the project: {}\nLayers selected in the project: {}".format(
-            total_layers, 
-            selected_layers
-        )
-        
-        QMessageBox.information(
-            self.iface.mainWindow(), 
-            "Layer Counter", 
-            message
-        )
+    def toggle_panel(self):
+        """Mostra o nasconde il pannello."""
+        if self.dock_widget:
+            if self.dock_widget.isVisible():
+                self.dock_widget.hide()
+            else:
+                self.dock_widget.show()
 
     def run(self):
-        """Run method that calls the main function."""
-        self.test_function()
+        """Run method - ora mostra/nasconde il pannello invece del popup."""
+        self.toggle_panel()

@@ -24,7 +24,7 @@ changelog=1.0
         - First release
 
 # Tags are comma separated with spaces allowed
-tags=python
+tags=python,layer,count,panel
 
 homepage=https://github.com/mpeppucci/LayerCounter
 category=Plugins
